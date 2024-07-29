@@ -1,0 +1,149 @@
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Scanner;
+
+// Represents a single room in the hotel
+class Room {
+    private int roomNumber;
+    private boolean isAvailable;
+    
+    public Room(int roomNumber) {
+        this.roomNumber = roomNumber;
+        this.isAvailable = true;
+    }
+
+    public int getRoomNumber() {
+        return roomNumber;
+    }
+
+    public boolean isAvailable() {
+        return isAvailable;
+    }
+
+    public void setAvailable(boolean available) {
+        isAvailable = available;
+    }
+}
+
+// Manages the list of rooms and availability
+class Hotel {
+    private List<Room> rooms;
+
+    public Hotel(int numberOfRooms) {
+        rooms = new ArrayList<>();
+        for (int i = 1; i <= numberOfRooms; i++) {
+            rooms.add(new Room(i));
+        }
+    }
+
+    public Room getAvailableRoom() {
+        for (Room room : rooms) {
+            if (room.isAvailable()) {
+                return room;
+            }
+        }
+        return null;
+    }
+
+    public void bookRoom(Room room) {
+        room.setAvailable(false);
+    }
+
+    public void cancelBooking(Room room) {
+        room.setAvailable(true);
+    }
+
+    public List<Room> getRooms() {
+        return rooms;
+    }
+}
+
+// Handles booking details
+class Booking {
+    private Room room;
+    private String customerName;
+
+    public Booking(Room room, String customerName) {
+        this.room = room;
+        this.customerName = customerName;
+    }
+
+    public Room getRoom() {
+        return room;
+    }
+
+    public String getCustomerName() {
+        return customerName;
+    }
+}
+
+// Handles payment methods
+class Payment {
+    public static void processPayment(String method, double amount) {
+        // Simulate payment processing
+        System.out.println("Processing " + method + " payment of $" + amount);
+    }
+}
+
+// Main class for the hotel reservation system
+public class HotelReservationSystem {
+    private static Hotel hotel = new Hotel(10); // Create a hotel with 10 rooms
+
+    public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+        while (true) {
+            System.out.println("1. Book Room");
+            System.out.println("2. Cancel Booking");
+            System.out.println("3. Exit");
+            System.out.print("Choose an option: ");
+            int choice = scanner.nextInt();
+            scanner.nextLine();  // Consume newline
+
+            switch (choice) {
+                case 1:
+                    bookRoom(scanner);
+                    break;
+                case 2:
+                    cancelBooking(scanner);
+                    break;
+                case 3:
+                    System.out.println("Exiting...");
+                    return;
+                default:
+                    System.out.println("Invalid choice.");
+            }
+        }
+    }
+
+    private static void bookRoom(Scanner scanner) {
+        Room room = hotel.getAvailableRoom();
+        if (room != null) {
+            System.out.print("Enter your name: ");
+            String name = scanner.nextLine();
+            Booking booking = new Booking(room, name);
+            hotel.bookRoom(room);
+            System.out.println("Room " + room.getRoomNumber() + " booked for " + name);
+            System.out.print("Enter payment method (credit/debit): ");
+            String paymentMethod = scanner.nextLine();
+            Payment.processPayment(paymentMethod, 100.0); // Assume a fixed rate of $100
+        } else {
+            System.out.println("No rooms available.");
+        }
+    }
+
+    private static void cancelBooking(Scanner scanner) {
+        System.out.print("Enter room number to cancel: ");
+        int roomNumber = scanner.nextInt();
+        scanner.nextLine(); // Consume newline
+        Room room = hotel.getRooms().stream()
+                .filter(r -> r.getRoomNumber() == roomNumber)
+                .findFirst()
+                .orElse(null);
+        if (room != null && !room.isAvailable()) {
+            hotel.cancelBooking(room);
+            System.out.println("Booking for room " + roomNumber + " has been canceled.");
+        } else {
+            System.out.println("Invalid room number or room not booked.");
+        }
+    }
+}
